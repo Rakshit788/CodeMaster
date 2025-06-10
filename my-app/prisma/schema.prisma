@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  username     String?       @unique
+  name         String?
+  image        String?
+  provider     String
+  providerId   String        @unique
+  submissions  Submission[]
+  bookmarks    Bookmark[]
+  favourites   Favourite[]
+}
+
+model Problem {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  difficulty  String        // 'Easy', 'Medium', 'Hard'
+  tags        String[]
+  testCases   TestCase[]
+  submissions Submission[]
+  startcode   String?
+  testcode   String?
+  favourites  Favourite[]
+  bookmarks   Bookmark[]
+}
+
+model TestCase {
+  id         Int      @id @default(autoincrement())
+  input      String
+  expected   String
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  Int
+}
+
+model Submission {
+  id         Int      @id @default(autoincrement())
+  code       String
+  language   String   // e.g., "cpp", "python", "js"
+  output     String?
+  verdict    String   // "Accepted", "Wrong Answer", etc.
+  createdAt  DateTime @default(now())
+  types      String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  Int
+}
+
+model Language {
+  id        Int    @id @default(autoincrement())
+  name      String // e.g., "Python"
+  extension String // ".py"
+  version   String // "3.10"
+}
+
+model Favourite {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  Int
+
+  @@unique([userId, problemId]) // Prevents duplicate favourites
+}
+
+model Bookmark {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  Int
+
+  @@unique([userId, problemId]) // Prevents duplicate bookmarks
+}
