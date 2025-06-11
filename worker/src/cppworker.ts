@@ -11,7 +11,8 @@ const connection = new IORedis({
 
 const worker = new Worker('cpp-judge', async (job) => {
   const code = job.data.code;
-
+ console.log(`🔨 Processing job ${job.id} with code:\n${code}`);
+ 
   return new Promise((resolve) => {
     const docker = spawn('docker', [
       'run',
