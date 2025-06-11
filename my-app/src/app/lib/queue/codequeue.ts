@@ -1,8 +1,10 @@
 import { Queue } from 'bullmq';
-import { connection } from './connection';
 
-export const codeQueue = new Queue('code-runner', { connection });
-
-codeQueue.on('progress', (job) => {
-  console.log(`Job ${job.id} completed with result: ${job.returnvalue}`);
+export const jobQueue = new Queue('cpp-judge', {
+  connection: { url: process.env.REDIS_URL }
+  ,
+  defaultJobOptions: {
+    removeOnComplete: false,
+    removeOnFail: false
+  }
 });

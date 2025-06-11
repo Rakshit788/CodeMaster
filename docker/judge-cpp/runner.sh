@@ -1,31 +1,22 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+set -e
 
-SRC="$1"           # e.g. "solution.cpp" (relative to WORKDIR)
-BIN="solution"
-ERRF="compile.stderr"
+# Read C++ code from stdin into solution.cpp
+cat > solution.cpp
 
-# 1) Try to compile, capturing stderr
-if ! g++ -std=c++17 -O2 "$SRC" -o "$BIN" 2> "$ERRF"; then
-  ERR=$(<"$ERRF")
-  # Escape quotes and emit JSON
-  printf '{"status":"compile_error","message":"%s"}\n' \
-         "${ERR//\"/\\\"}"
+# Compile the code
+if ! g++ -O2 -std=c++17 solution.cpp -o solution.out 2> compile_error.txt; then
+  err=$(cat compile_error.txt)
+  echo "{\"status\":\"compile_error\",\"message\":\"$err\"}"
   exit 0
 fi
 
-# 2) Run under `time`, capture stdout/stderr
-{ TIMEFORMAT="%Es"; time ./"$BIN"; } > stdout.txt 2> stderr.txt
-RC=$?
-RT=$TIMEFORMAT
+# Run the binary and measure execution time and output
+START=$(date +%s.%N)
+OUT=$(./solution.out 2>&1)
+END=$(date +%s.%N)
 
-# 3) Emit JSON for runtime_error or success
-if [ $RC -ne 0 ]; then
-  ERR=$(<stderr.txt)
-  printf '{"status":"runtime_error","message":"%s","runtime":"%s"}\n' \
-         "${ERR//\"/\\\"}" "$RT"
-else
-  OUT=$(<stdout.txt)
-  printf '{"status":"ok","output":"%s","runtime":"%s"}\n' \
-         "${OUT//\"/\\\"}" "$RT"
-fi
+RUNTIME=$(echo "$END - $START" | bc)
+
+# Return result in JSON
+echo "{\"status\":\"success\",\"time\":\"$RUNTIME\",\"output\":\"$OUT\"}"
