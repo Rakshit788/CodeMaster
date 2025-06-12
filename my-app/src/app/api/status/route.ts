@@ -17,13 +17,13 @@ export async function GET(req: Request) {
 
   // 2. Fetch the job
   const job = await jobQueue.getJob(jobId);
-  console.log('📦 jobQueue.getJob returned:', job);
+  console.log(' jobQueue.getJob returned:', job);
 
   if (!job) {
     return NextResponse.json({ status: 'not_found' }, { status: 404 });
   }
 
-  // 3. Determine state and result
+
   const state = await job.getState();
   const result = state === 'completed' ? job.returnvalue : null;
 

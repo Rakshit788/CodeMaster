@@ -39,6 +39,7 @@ services:
     container_name: leetcode-api
     ports:
       - "3000:3000"
+      - "5555:5555"
     volumes:
       - ./my-app:/usr/src/app
     depends_on:
