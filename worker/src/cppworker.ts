@@ -11,7 +11,9 @@ const connection = new IORedis({
 
 const worker = new Worker('cpp-judge', async (job) => {
   const code = job.data.code;
- console.log(`🔨 Processing job ${job.id} with code:\n${code}`);
+  const testCode = job.data.testCode;
+
+ console.log(`🔨 Processing job ${job.id} with code:\n${testCode}`);
  
   return new Promise((resolve) => {
     const docker = spawn('docker', [
@@ -33,7 +35,7 @@ const worker = new Worker('cpp-judge', async (job) => {
       }
 
       try {
-        const result = JSON.parse(output);
+        const result = JSON.parse(output) 
         resolve(result);
       } catch (e) {
         resolve({ status: "error", message: output });
@@ -41,6 +43,8 @@ const worker = new Worker('cpp-judge', async (job) => {
     });
 
     docker.stdin.write(code);
+    docker.stdin.write('\n'); // Ensure the code ends with a newline
+    docker.stdin.write(testCode);
     docker.stdin.end();
   });
 }, { connection });

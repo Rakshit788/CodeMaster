@@ -4,12 +4,14 @@
 import Editor from "@monaco-editor/react";
 import { useState } from "react";
 
-export default function CodeEditor({
+export default  function CodeEditor({
   initialCode,
   onSubmit,
+  onChange,
 }: {
   initialCode?: string;
   onSubmit?: (code: string) => void;
+  onChange?: (value: string) => void; // <-- ADD THIS
 }) {
   const [code, setCode] = useState(initialCode || "");
 
@@ -21,19 +23,24 @@ export default function CodeEditor({
           defaultLanguage="cpp"
           value={code}
           theme="vs-dark"
-          onChange={(value) => setCode(value || "")}
+          onChange={(value) => {
+            setCode(value || "");
+            onChange?.(value || ""); // <-- TRIGGER onChange
+          }}
           options={{
             fontSize: 16,
             minimap: { enabled: false },
           }}
         />
       </div>
-      <button
-        className="mt-4 self-end px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        onClick={() => onSubmit?.(code)}
-      >
-        Submit
-      </button>
+      {onSubmit && (
+        <button
+          className="mt-4 self-end px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => onSubmit(code)}
+        >
+          Submit
+        </button>
+      )}
     </div>
   );
 }
