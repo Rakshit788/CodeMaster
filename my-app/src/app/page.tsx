@@ -2,101 +2,69 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen flex flex-col bg-white dark:bg-[#0d0d0d] text-black dark:text-white font-sans">
+      
+      {/* NAVBAR */}
+      <header className="w-full sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Image src="/next.svg" alt="App Logo" width={40} height={40} className="dark:invert"/>
+            <span className="text-xl font-bold">CodeMaster</span>
+          </div>
+          <nav className="flex gap-6 text-sm font-medium">
+            <a href="" className="hover:text-blue-600 dark:hover:text-blue-400">Problems</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contests</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Discuss</a>
+            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Sign In</a>
+          </nav>
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+      {/* HERO SECTION */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+          Master Coding, One Problem at a Time
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mb-8">
+          Join CodeMaster to practice coding problems, compete in contests, and grow your skills.
+        </p>
+        <div className="flex gap-4 flex-wrap justify-center">
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-3 text-sm font-semibold shadow"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
+            Start Solving
           </a>
           <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
+            className="border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full px-6 py-3 text-sm font-semibold"
           >
-            Read our docs
+            View Problems
           </a>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* PROBLEMS PREVIEW */}
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        <h2 className="text-2xl font-bold mb-6">Featured Problems</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((id) => (
+            <div key={id} className="p-4 border rounded-lg hover:shadow-lg transition">
+              <h3 className="font-semibold mb-2">Problem Title {id}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                A short description of the problem to give users an idea what it’s about.
+              </p>
+              <a href="#" className="text-blue-600 dark:text-blue-400 text-sm mt-2 inline-block">
+                Solve now →
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        © 2025 CodeMaster. Built with Next.js.
       </footer>
     </div>
   );
