@@ -54,7 +54,7 @@ export default function Home() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 A short description of the problem to give users an idea what it’s about.
               </p>
-              <a href="#" className="text-blue-600 dark:text-blue-400 text-sm mt-2 inline-block">
+              <a href="" className="text-blue-600 dark:text-blue-400 text-sm mt-2 inline-block">
                 Solve now →
               </a>
             </div>
