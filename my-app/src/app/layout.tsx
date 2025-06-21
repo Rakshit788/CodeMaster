@@ -1,4 +1,5 @@
 import "./globals.css";
+import ClientLayout from "../../ClientLayout";
 
 export const metadata = {
   title: "CodeMaster",
@@ -14,7 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="bg-gray-100 dark:bg-[#0d1117] text-black dark:text-white min-h-screen flex flex-col font-sans">
-        {children}
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

@@ -1,3 +1,6 @@
+'use client'
+
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 
 export default function Home() {
@@ -15,7 +18,7 @@ export default function Home() {
             <a href="" className="hover:text-blue-600 dark:hover:text-blue-400">Problems</a>
             <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contests</a>
             <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Discuss</a>
-            <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Sign In</a>
+            <button onClick={()=> signIn('github')}>Sign In</button>
           </nav>
         </div>
       </header>
