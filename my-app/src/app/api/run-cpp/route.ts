@@ -1,27 +1,28 @@
 // pages/api/run-cpp.ts
-import { NextResponse , NextRequest } from 'next/server';
+
+import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuid } from 'uuid';
 import { prisma } from '../../lib/prisma';
 import { jobQueue } from '../../lib/queue/codequeue';
-import { log } from 'console';
 
+type ResponseType = {
+  jobId: string;
+  status: string;
+};
 
+export async function POST(req: NextRequest) {
+  const { problemId, code } = await req.json();
 
-export async function POST(req :NextRequest ) {
-  const {problemId ,  code  } = await req.json();
- 
-  if(!problemId || !code ) {
+  if (!problemId || !code) {
     return NextResponse.json(
-      { error: 'Missing required fields: problemId, code, or testCode' },
+      { error: 'Missing required fields: problemId, code' },
       { status: 400 }
     );
   }
- 
-  
-  
-  const problem  =  await  prisma.problem.findUnique({
-    where : {id: problemId}  , 
-    select : {
+
+  const problem = await prisma.problem.findUnique({
+    where: { id: problemId },
+    select: {
       id: true,
       title: true,
       description: true,
@@ -32,28 +33,37 @@ export async function POST(req :NextRequest ) {
       testCases: {
         select: {
           input: true,
-          expected: true
-        }
-      }
-    }
-  })
-  
-console.log(problem);
-  
+          expected: true,
+        },
+      },
+    },
+  });
+
+  if (!problem) {
+    return NextResponse.json(
+      { error: 'Problem not found' },
+      { status: 404 }
+    );
+  }
 
   const jobId = uuid();
 
-  // 2) Enqueue a new job with code + harness
+  // Enqueue job
   await jobQueue.add(
     'run-cpp',
     {
-      code,                     
-      testCode: problem?.testcode,
+      code,
+      testCode: problem.testcode,
       jobId,
     },
     { jobId }
   );
 
-  // 3) Return the job ID for polling
-  return NextResponse.json({ status: 'queued', jobId });
+  // Return jobId
+  const response: ResponseType = {
+    jobId,
+    status: 'Queued',
+  };
+
+  return NextResponse.json(response);
 }

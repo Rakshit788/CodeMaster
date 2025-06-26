@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Editor } from "@monaco-editor/react";
+import { json } from "stream/consumers";
 
 export default function CodeEditor({
   initialValue = "",
@@ -11,23 +12,67 @@ export default function CodeEditor({
 }) {
   const [code, setCode] = useState(initialValue);
   const [loading, setLoading] = useState(false);
+  const [data , setdata] =  useState({jobId : ""  ,  status : ""}) ;
+  const [fresult , setfresult] =  useState("") ; 
+const handleAns = async (jobId: string) => {
+  while (true) {
+    const response = await fetch(`/api/status?key=${jobId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/run-cpp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problemId, code }),
-      });
-      const data = await response.json();
-      console.log("Result:", data);
-    } catch (err) {
-      console.error("Submission error:", err);
-    } finally {
-      setLoading(false);
+    const data = await response.json();
+
+    const status = data?.result?.status;
+
+    console.log("Polled status:", status);
+
+    // Set result in state
+    if (status) {
+      setfresult(status); // ✅ this updates UI
     }
-  };
+
+    // Exit condition
+    if (status === "success" || status === "fail" || status === "error") {
+      break;
+    }
+
+    // Wait before next poll
+    await new Promise((res) => setTimeout(res, 2000));
+  }
+};
+
+const handleSubmit = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch("/api/run-cpp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ problemId, code }),
+    });
+    const dat = await response.json();
+   setdata(dat) ; 
+
+ 
+   
+
+  
+   
+    const JobId = data.jobId;  // ✅ Correct key
+   
+    
+
+    if (JobId) {
+      await handleAns(JobId);  // ✅ Also add await to ensure we wait for results
+    } else {
+     
+    }
+  } catch (err) {
+    console.error("Submission error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="h-full flex flex-col gap-4 p-4 bg-white dark:bg-[#0d1117] rounded-xl shadow-md border">
@@ -48,6 +93,24 @@ export default function CodeEditor({
       >
         {loading ? "Submitting..." : "Submit"}
       </button>
+      {fresult === "" && (
+  <div className="text-gray-500 mt-4">⏳ Waiting for result...</div>
+)}
+
+      {fresult === "success" && (
+  <div className="bg-green-100 text-green-800 p-4 mt-4 rounded-lg border border-green-300 shadow-sm animate-pulse">
+    <h2 className="text-xl font-bold">✅ All test cases passed!</h2>
+    <p className="text-sm">Great job! Your solution is correct.</p>
+  </div>
+)}
+
+{fresult === "fail" || fresult === "error" && (
+  <div className="bg-red-100 text-red-800 p-4 mt-4 rounded-lg border border-red-300 shadow-sm animate-pulse">
+    <h2 className="text-xl font-bold">❌ Some test cases failed.</h2>
+    <p className="text-sm">Please review your code and try again.</p>
+  </div>
+)}
+
     </div>
   );
 }
