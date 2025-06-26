@@ -14,7 +14,9 @@ export default function CodeEditor({
   const [loading, setLoading] = useState(false);
   const [data , setdata] =  useState({jobId : ""  ,  status : ""}) ;
   const [fresult , setfresult] =  useState("") ; 
+  const [submit, setsubmit] =  useState(false) ; 
 const handleAns = async (jobId: string) => {
+
   while (true) {
     const response = await fetch(`/api/status?key=${jobId}`, {
       method: "GET",
@@ -33,7 +35,7 @@ const handleAns = async (jobId: string) => {
     }
 
     // Exit condition
-    if (status === "success" || status === "fail" || status === "error") {
+    if (status === "success" || status === "fail" || status === "error" || status==="timeout") {
       break;
     }
 
@@ -43,6 +45,10 @@ const handleAns = async (jobId: string) => {
 };
 
 const handleSubmit = async () => {
+    setLoading(true);
+  setfresult(""); // clear last result
+  setsubmit(false);
+
   setLoading(true);
   try {
     const response = await fetch("/api/run-cpp", {
@@ -58,12 +64,13 @@ const handleSubmit = async () => {
 
   
    
-    const JobId = data.jobId;  // ✅ Correct key
+    const JobId = dat.jobId;  // ✅ Correct key
    
     
 
     if (JobId) {
-      await handleAns(JobId);  // ✅ Also add await to ensure we wait for results
+      await handleAns(JobId);  
+      // ✅ Also add await to ensure we wait for results
     } else {
      
     }
@@ -71,7 +78,9 @@ const handleSubmit = async () => {
     console.error("Submission error:", err);
   } finally {
     setLoading(false);
+    setsubmit(true)
   }
+  
 };
 
   return (
@@ -93,7 +102,7 @@ const handleSubmit = async () => {
       >
         {loading ? "Submitting..." : "Submit"}
       </button>
-      {fresult === "" && (
+      {fresult === "" && submit===true && (
   <div className="text-gray-500 mt-4">⏳ Waiting for result...</div>
 )}
 
@@ -104,7 +113,7 @@ const handleSubmit = async () => {
   </div>
 )}
 
-{fresult === "fail" || fresult === "error" && (
+{["error" , "timeout" , "fail"].includes(fresult) && (
   <div className="bg-red-100 text-red-800 p-4 mt-4 rounded-lg border border-red-300 shadow-sm animate-pulse">
     <h2 className="text-xl font-bold">❌ Some test cases failed.</h2>
     <p className="text-sm">Please review your code and try again.</p>
