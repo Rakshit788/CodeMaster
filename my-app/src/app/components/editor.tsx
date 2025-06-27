@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import { json } from "stream/consumers";
+import { useSession } from "next-auth/react";
+import { prisma } from "../lib/prisma";
 
 export default function CodeEditor({
   initialValue = "",
@@ -10,11 +12,18 @@ export default function CodeEditor({
   initialValue?: string;
   problemId?: number;
 }) {
+
   const [code, setCode] = useState(initialValue);
   const [loading, setLoading] = useState(false);
   const [data , setdata] =  useState({jobId : ""  ,  status : ""}) ;
   const [fresult , setfresult] =  useState("") ; 
   const [submit, setsubmit] =  useState(false) ; 
+
+
+  const{data :  session ,  status } =  useSession() 
+  console.log(data );
+  
+  
 const handleAns = async (jobId: string) => {
 
   while (true) {
@@ -59,14 +68,9 @@ const handleSubmit = async () => {
     const dat = await response.json();
    setdata(dat) ; 
 
- 
-   
-
-  
    
     const JobId = dat.jobId;  // ✅ Correct key
    
-    
 
     if (JobId) {
       await handleAns(JobId);  

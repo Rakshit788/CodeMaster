@@ -1,11 +1,16 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
+import { NextUIProvider } from "@nextui-org/react";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
+
     <SessionProvider>
-      {children}
+      <NextUIProvider>
+ {children}
+      </NextUIProvider>
+     
     </SessionProvider>
   );
 }

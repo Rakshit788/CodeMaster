@@ -1,6 +1,7 @@
 import "./globals.css";
 import ClientLayout from "../../ClientLayout";
 
+
 export const metadata = {
   title: "CodeMaster",
   description: "LeetCode-style coding interface for practicing problems and competing in contests.",
