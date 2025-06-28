@@ -32,7 +32,7 @@ const worker = new Worker('cpp-judge', async (job) => {
         output: "",
         error: "Time Limit Exceeded"
       });
-    }, 5000);
+    }, 15000);
 
     docker.stdout.on('data', (data) => output += data.toString());
     docker.stderr.on('data', (data) => error += data.toString());

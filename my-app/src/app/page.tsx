@@ -3,6 +3,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Card,
@@ -18,6 +19,7 @@ import {
 export default function Home() {
   const { data: session, status } = useSession();
   const username = session?.user?.name || "User";
+  const router  =  useRouter()
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-[#0d0d0d] text-black dark:text-white font-sans">
@@ -30,7 +32,7 @@ export default function Home() {
             <span className="text-xl font-bold">CodeMaster</span>
           </div>
           <nav className="flex gap-6 text-sm font-medium items-center">
-            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Problems</Link>
+            <Link href="/problems" className="hover:text-blue-600 dark:hover:text-blue-400">Problems</Link>
             <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contests</Link>
             <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Discuss</Link>
 
@@ -76,7 +78,7 @@ export default function Home() {
           <Button color="primary" size="lg">
             Start Solving
           </Button>
-          <Button variant="bordered" size="lg">
+          <Button variant="bordered" size="lg" onClick={()=> router.push('/problems') }>
             View Problems
           </Button>
         </div>

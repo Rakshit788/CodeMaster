@@ -91,11 +91,9 @@ model TestCase {
 model Submission {
   id         Int      @id @default(autoincrement())
   code       String
-  language   String   // e.g., "cpp", "python", "js"
   output     String?
   verdict    String   // "Accepted", "Wrong Answer", etc.
   createdAt  DateTime @default(now())
-  types      String
   user       User     @relation(fields: [userId], references: [id])
   userId     String
   problem    Problem  @relation(fields: [problemId], references: [id])

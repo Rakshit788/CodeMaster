@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { Editor } from "@monaco-editor/react";
-import { json } from "stream/consumers";
 import { useSession } from "next-auth/react";
-import { prisma } from "../lib/prisma";
+import { log } from "console";
+import { resourceLimits } from "worker_threads";
 
 export default function CodeEditor({
   initialValue = "",
@@ -12,84 +12,95 @@ export default function CodeEditor({
   initialValue?: string;
   problemId?: number;
 }) {
-
   const [code, setCode] = useState(initialValue);
   const [loading, setLoading] = useState(false);
-  const [data , setdata] =  useState({jobId : ""  ,  status : ""}) ;
-  const [fresult , setfresult] =  useState("") ; 
-  const [submit, setsubmit] =  useState(false) ; 
+  const [jobData, setJobData] = useState({ jobId: "", status: "" });
+  const [fresult, setFresult] = useState("");
+  const [submit, setSubmit] = useState(false);
 
+  const { data: session } = useSession();
 
-  const{data :  session ,  status } =  useSession() 
-  console.log(data );
-  
-  
-const handleAns = async (jobId: string) => {
+  const updateUser = async (
+    problemId: number,
+    status: string,
+    code: string
+  ) => {
+    if (!session?.user?.email) return;
 
-  while (true) {
-    const response = await fetch(`/api/status?key=${jobId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await response.json();
-
-    const status = data?.result?.status;
-
-    console.log("Polled status:", status);
-
-    // Set result in state
-    if (status) {
-      setfresult(status); // ✅ this updates UI
-    }
-
-    // Exit condition
-    if (status === "success" || status === "fail" || status === "error" || status==="timeout") {
-      break;
-    }
-
-    // Wait before next poll
-    await new Promise((res) => setTimeout(res, 2000));
-  }
-};
-
-const handleSubmit = async () => {
-    setLoading(true);
-  setfresult(""); // clear last result
-  setsubmit(false);
-
-  setLoading(true);
-  try {
-    const response = await fetch("/api/run-cpp", {
+    const result = await fetch("/api/updateuser", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId, code }),
+      body: JSON.stringify({
+        email: session.user.email,
+        problemid: problemId,
+        status,
+        code,
+      }),
     });
-    const dat = await response.json();
-   setdata(dat) ; 
+    console.log('user update', result);
+  };
 
-   
-    const JobId = dat.jobId;  // ✅ Correct key
-   
 
-    if (JobId) {
-      await handleAns(JobId);  
-      // ✅ Also add await to ensure we wait for results
-    } else {
-     
+
+  const handleAns = async (jobId: string) => {
+    while (true) {
+      const response = await fetch(`/api/status?key=${jobId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      const status = data?.result?.status;
+
+      if (status) {
+        setFresult(status);
+      }
+
+      if (
+        status === "success" ||
+        status === "fail" ||
+        status === "error" ||
+        status === "timeout"
+      ) {
+        // Call updateUser after final verdict
+        await updateUser(problemId, status, code);
+        break;
+      }
+
+      await new Promise((res) => setTimeout(res, 2000));
     }
-  } catch (err) {
-    console.error("Submission error:", err);
-  } finally {
-    setLoading(false);
-    setsubmit(true)
-  }
-  
-};
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setFresult("");
+    setSubmit(false);
+
+    try {
+      const response = await fetch("/api/run-cpp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemId, code }),
+      });
+
+      const data = await response.json();
+      setJobData(data);
+
+      const jobId = data.jobId;
+      if (jobId) {
+        await handleAns(jobId);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+    } finally {
+      setLoading(false);
+      setSubmit(true);
+    }
+  };
 
   return (
-    <div className="h-full flex flex-col gap-4 p-4 bg-white dark:bg-[#0d1117] rounded-xl shadow-md border">
-      <div className="flex-1 border border-gray-700 rounded-lg overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full bg-[#0d1117] p-4">
+      <div className="flex-1 border border-gray-700 rounded-xl overflow-hidden">
         <Editor
           height="100%"
           defaultLanguage="cpp"
@@ -99,31 +110,32 @@ const handleSubmit = async () => {
         />
       </div>
 
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg w-fit self-end transition duration-200"
-        disabled={loading}
-      >
-        {loading ? "Submitting..." : "Submit"}
-      </button>
-      {fresult === "" && submit===true && (
-  <div className="text-gray-500 mt-4">⏳ Waiting for result...</div>
-)}
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={handleSubmit}
+          className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition ${loading ? "opacity-60 cursor-not-allowed" : ""
+            }`}
+          disabled={loading}
+        >
+          {loading ? "Submitting..." : "Submit"}
+        </button>
+      </div>
 
+      {fresult === "" && submit && (
+        <div className="text-gray-400 text-sm mt-2 animate-pulse">
+          ⏳ Waiting for result...
+        </div>
+      )}
       {fresult === "success" && (
-  <div className="bg-green-100 text-green-800 p-4 mt-4 rounded-lg border border-green-300 shadow-sm animate-pulse">
-    <h2 className="text-xl font-bold">✅ All test cases passed!</h2>
-    <p className="text-sm">Great job! Your solution is correct.</p>
-  </div>
-)}
-
-{["error" , "timeout" , "fail"].includes(fresult) && (
-  <div className="bg-red-100 text-red-800 p-4 mt-4 rounded-lg border border-red-300 shadow-sm animate-pulse">
-    <h2 className="text-xl font-bold">❌ Some test cases failed.</h2>
-    <p className="text-sm">Please review your code and try again.</p>
-  </div>
-)}
-
+        <div className="bg-green-600 text-white p-3 rounded-lg mt-2">
+          ✅ All test cases passed!
+        </div>
+      )}
+      {["fail", "error", "timeout"].includes(fresult) && (
+        <div className="bg-red-600 text-white p-3 rounded-lg mt-2">
+          ❌ Some test cases failed. Try again.
+        </div>
+      )}
     </div>
   );
 }
