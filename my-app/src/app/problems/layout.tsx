@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function ProblemsLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const router  =  useRouter()
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
@@ -29,6 +31,7 @@ export default function ProblemsLayout({ children }: { children: React.ReactNode
               {session.user?.image ? (
                 <img
                   src={session.user.image}
+                  onClick={() => router.push('/profile')}
                   alt="Profile"
                   className="w-9 h-9 rounded-full border shadow-sm ring-2 ring-blue-400"
                 />
