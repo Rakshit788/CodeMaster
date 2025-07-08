@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -52,17 +53,15 @@ export default function ProfilePage() {
       });
       const failedJson = await failedRes.json();
 
-      // Update counts only
       setTotalSubmissions(subjson.totalSubmissions || 0);
       setTotalSolved(passedJson.totalProblemsPassed || 0);
       setTotalAttempted(failedJson.totalProblemsFailed || 0);
 
-      // Prepare last 10 submissions for display
       const displayProblems = (subjson.submissions || [])
         .slice(-10)
         .map((p) => ({
           id: p.id,
-          title: p.title.split("").join(""),
+          title: p.title,
           difficulty: p.difficulty,
           tag: p.tags?.[0] || "Other",
           status: p.status || "attempted",
@@ -88,84 +87,70 @@ export default function ProfilePage() {
       : p.status === selectedTab
   );
 
-
-
   return (
     <div className="min-h-screen flex bg-[#0d0d0d] text-white font-sans">
       {/* Sidebar */}
-      <aside className="w-64 p-6 bg-[#121212] hidden sm:flex flex-col gap-6">
+      <aside className="w-64 p-6 bg-[#121212] hidden sm:flex flex-col gap-6 border-r border-gray-800">
         <div className="flex items-center gap-4">
           {userdata?.user?.image ? (
             <img
               src={userdata.user.image}
               alt="User"
-              className="rounded-full h-14 w-14"
+              className="rounded-full h-14 w-14 border-2 border-purple-500 shadow-purple-500/40 shadow-md object-cover"
             />
           ) : (
             <Avatar name="User" size="lg" />
           )}
-          <div>
-            <p className="font-semibold">{userdata?.user?.name}</p>
-            <p className="text-sm text-gray-400">{userdata?.user?.email}</p>
+          <div className="min-w-0">
+            <p className="font-semibold truncate">{userdata?.user?.name}</p>
+            <p className="text-sm text-gray-400 truncate">{userdata?.user?.email}</p>
           </div>
         </div>
 
         <Button
-          color="danger"
-          variant="bordered"
-          size="sm"
-          className="bg-red-600 w-full"
           onClick={() => signOut()}
+          className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-semibold py-2 rounded-lg shadow-md hover:shadow-lg transition hover:scale-105"
         >
           Sign Out
         </Button>
 
         <Divider className="bg-gray-700" />
 
-        <h2 className="text-xl font-bold">Tags</h2>
-        <div className="space-y-2">
-          
-        </div>
+        <h2 className="text-lg font-bold">Profile Navigation</h2>
+        <p className="text-sm text-gray-400">Tags section coming soon...</p>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 px-4 py-8 max-w-4xl mx-auto">
+      {/* Main Content */}
+      <main className="flex-1 px-4 py-8 w-full max-w-5xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">CodeMaster Stats</h1>
-          <p className="text-gray-400">
-            Overview of your problem-solving progress
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-2 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text">
+            CodeMaster Stats
+          </h1>
+          <p className="text-gray-400">Your problem-solving journey at a glance.</p>
         </header>
 
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-          <Card className="rounded-2xl bg-[#1a1a1a] text-center hover:shadow-md transition">
-            <CardHeader className="justify-center">
-              <h2 className="text-3xl font-semibold">
-                {totalSolved.toLocaleString()}
-              </h2>
-            </CardHeader>
-            <CardBody className="text-gray-400">Solved</CardBody>
-          </Card>
-
-          <Card className="rounded-2xl bg-[#1a1a1a] text-center hover:shadow-md transition">
-            <CardHeader className="justify-center">
-              <h2 className="text-3xl font-semibold">
-                {totalAttempted.toLocaleString()}
-              </h2>
-            </CardHeader>
-            <CardBody className="text-gray-400">Attempted</CardBody>
-          </Card>
-
-          <Card className="rounded-2xl bg-[#1a1a1a] text-center hover:shadow-md transition">
-            <CardHeader className="justify-center">
-              <h2 className="text-3xl font-semibold">
-                {totalSubmissions.toLocaleString()}
-              </h2>
-            </CardHeader>
-            <CardBody className="text-gray-400">Submissions</CardBody>
-          </Card>
+        {/* Stats Cards */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 w-full">
+          {[
+            { label: "Solved", value: totalSolved },
+            { label: "Attempted", value: totalAttempted },
+            { label: "Submissions", value: totalSubmissions },
+          ].map((stat) => (
+            <Card
+              key={stat.label}
+              className="rounded-2xl bg-[#1a1a1a] text-center hover:shadow-purple-500/40 hover:shadow-md transition transform hover:-translate-y-1 w-full"
+            >
+              <CardHeader className="justify-center">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text">
+                  {stat.value.toLocaleString()}
+                </h2>
+              </CardHeader>
+              <CardBody className="text-gray-400">{stat.label}</CardBody>
+            </Card>
+          ))}
         </section>
 
+        {/* Tabs + Recent Problems */}
         <section>
           <Tabs
             selectedKey={selectedTab}
@@ -184,27 +169,29 @@ export default function ProfilePage() {
             {filtered.map((p) => (
               <Card
                 key={p.id}
-                className="rounded-lg bg-[#1a1a1a] hover:bg-[#262626] transition flex justify-between items-center p-4"
+                isPressable
+                onPress={() => (window.location.href = `/problems/${p.id}`)}
+                className="rounded-lg bg-[#1a1a1a] hover:bg-[#262626] transition flex justify-between items-center p-4 border border-gray-800 hover:border-purple-500 w-full"
               >
-                <div>
-                  <h3 className="font-medium text-lg">{p.title}</h3>
+                <div className="w-full">
+                  <h3 className="font-medium text-lg truncate">{p.title}</h3>
                   <p className="text-sm text-gray-400">
-                    {p.difficulty} •{" "}
-                    {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                    {p.difficulty} • {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                   </p>
                 </div>
                 {p.status === "failed" && (
-                  <Button size="sm" color="danger" variant="light">
+                  <Button
+                    size="sm"
+                    variant="bordered"
+                    className="border-pink-500 text-pink-400 hover:bg-pink-500 hover:text-white transition"
+                  >
                     Retry
                   </Button>
                 )}
               </Card>
             ))}
-
             {filtered.length === 0 && (
-              <p className="text-center text-gray-500">
-                No problems to display.
-              </p>
+              <p className="text-center text-gray-500">No problems to display.</p>
             )}
           </div>
         </section>

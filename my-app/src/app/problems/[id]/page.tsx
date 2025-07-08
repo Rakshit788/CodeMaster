@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import CodeEditor from "../../components/editor";
+import TestCaseDisplay from "../../components/Testcase";
 
 type Problem = {
   id: number;
@@ -35,23 +36,23 @@ export default async function ProblemPage({ params }: { params: { id: string } }
   });
 
   if (!problem) {
-    return <div className="text-center py-10 text-xl">Problem not found</div>;
+    return <div className="text-center py-10 text-xl text-gray-400">🚫 Problem not found</div>;
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh-64px)] bg-gray-100 dark:bg-black">
-      {/* LEFT: Problem Description */}
-      <div className="p-4 lg:p-6 rounded-xl shadow-md bg-white dark:bg-[#161b22] overflow-y-auto border border-gray-300 dark:border-gray-700 h-full hide-scrollbar">
-  <h1 className="text-2xl lg:text-3xl font-bold text-black dark:text-white mb-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh-64px)] w-full bg-[#0d0d0d]">
+      {/* LEFT PANEL: Problem */}
+      <div className="px-6 py-6 overflow-y-auto border-r border-[#1f1f1f] text-white h-full hide-scrollbar">
+        <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
           {problem.title}
         </h1>
 
-        <p className="text-gray-800 dark:text-gray-300 mb-6 whitespace-pre-line leading-relaxed">
+        <p className="text-gray-300 mb-6 whitespace-pre-line leading-relaxed">
           {problem.description}
         </p>
 
         <span
-          className={`text-xs font-semibold px-3 py-1 rounded-full text-white shadow-sm ${
+          className={`text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm ${
             problem.difficulty === "Easy"
               ? "bg-green-600"
               : problem.difficulty === "Medium"
@@ -63,21 +64,13 @@ export default async function ProblemPage({ params }: { params: { id: string } }
         </span>
 
         <div className="mt-6">
-          <h2 className="font-semibold text-lg mb-3 text-black dark:text-white">Test Cases</h2>
-          <ul className="space-y-3">
-            {problem.testCases.map((tc, index) => (
-              <li key={index}>
-                <pre className="bg-gray-200 dark:bg-gray-800 text-sm p-3 rounded-lg overflow-x-auto shadow-inner">
-                  {JSON.stringify(tc, null, 2)}
-                </pre>
-              </li>
-            ))}
-          </ul>
+          <h2 className="text-lg font-semibold text-pink-400 mb-3">Test Cases</h2>
+          <TestCaseDisplay problemId={problem.id} />
         </div>
       </div>
 
-      {/* RIGHT: Code Editor */}
-      <div className="h-[85vh]">
+      {/* RIGHT PANEL: Code Editor */}
+      <div className="h-full w-full bg-[#0d0d0d]">
         <CodeEditor initialValue={problem.startcode} problemId={id} />
       </div>
     </div>

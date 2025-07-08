@@ -1,9 +1,8 @@
 "use client";
+
 import React, { useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import { useSession } from "next-auth/react";
-import { log } from "console";
-import { resourceLimits } from "worker_threads";
 
 export default function CodeEditor({
   initialValue = "",
@@ -14,20 +13,15 @@ export default function CodeEditor({
 }) {
   const [code, setCode] = useState(initialValue);
   const [loading, setLoading] = useState(false);
-  const [jobData, setJobData] = useState({ jobId: "", status: "" });
   const [fresult, setFresult] = useState("");
   const [submit, setSubmit] = useState(false);
 
   const { data: session } = useSession();
 
-  const updateUser = async (
-    problemId: number,
-    status: string,
-    code: string
-  ) => {
+  const updateUser = async (problemId: number, status: string, code: string) => {
     if (!session?.user?.email) return;
 
-    const result = await fetch("/api/updateuser", {
+    await fetch("/api/updateuser", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -37,33 +31,17 @@ export default function CodeEditor({
         code,
       }),
     });
-    console.log('user update', result);
   };
-
-
-
 
   const handleAns = async (jobId: string) => {
     while (true) {
-      const response = await fetch(`/api/status?key=${jobId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
+      const response = await fetch(`/api/status?key=${jobId}`);
       const data = await response.json();
       const status = data?.result?.status;
 
-      if (status) {
-        setFresult(status);
-      }
+      if (status) setFresult(status);
 
-      if (
-        status === "success" ||
-        status === "fail" ||
-        status === "error" ||
-        status === "timeout"
-      ) {
-        // Call updateUser after final verdict
+      if (["success", "fail", "error", "timeout"].includes(status)) {
         await updateUser(problemId, status, code);
         break;
       }
@@ -85,12 +63,8 @@ export default function CodeEditor({
       });
 
       const data = await response.json();
-      setJobData(data);
-
       const jobId = data.jobId;
-      if (jobId) {
-        await handleAns(jobId);
-      }
+      if (jobId) await handleAns(jobId);
     } catch (err) {
       console.error("Submission error:", err);
     } finally {
@@ -100,23 +74,29 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0d1117] p-4">
-      <div className="flex-1 border border-gray-700 rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-[#0d0d0d] p-4 border-l border-[#1f1f1f]">
+      <div className="flex-1 border border-gray-700 rounded-xl overflow-hidden shadow-lg">
         <Editor
-          height="100%"
+          height="65vh"
           defaultLanguage="cpp"
           value={code}
           onChange={(e) => setCode(e || "")}
           theme="vs-dark"
+          options={{
+            fontSize: 14,
+            minimap: { enabled: false },
+            padding: { top: 16 },
+          }}
         />
       </div>
 
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end mt-4">
         <button
           onClick={handleSubmit}
-          className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition ${loading ? "opacity-60 cursor-not-allowed" : ""
-            }`}
           disabled={loading}
+          className={`px-6 py-2 rounded-xl font-semibold bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md hover:from-pink-600 hover:to-purple-600 transition ${
+            loading ? "opacity-60 cursor-not-allowed" : ""
+          }`}
         >
           {loading ? "Submitting..." : "Submit"}
         </button>
